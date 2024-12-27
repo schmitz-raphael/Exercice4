@@ -13,6 +13,15 @@ public class User implements Serializable {
     private String email;
     private String phone;  // Added phone as per the schema
 
+    public User() {
+    }
+    // Constructor without ID (useful for scenarios where the ID is auto-generated or provided separately)
+    public User(String name, String email, String phone) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+    }
+
     // Getters and Setters
 
     public String getId() {
