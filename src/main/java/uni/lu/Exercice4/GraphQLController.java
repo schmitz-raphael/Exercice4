@@ -34,8 +34,19 @@ public class GraphQLController {
     }
 
     @QueryMapping
-    public Optional<User> getUser(@Argument String id){
+    public Optional<User> getUserById(@Argument String id){
         return userRepository.findById(id);
+    }
+    @QueryMapping
+    public ArrayList<User> getUserByName(@Argument String name){
+        Iterable<User> tweetsIterable = userRepository.findAll();
+        ArrayList<User> userList = new ArrayList<>();
+        tweetsIterable.forEach(user -> {
+            if (containsCaseInsensitive(user.getName(), name)){
+                userList.add(user);
+            }
+        });
+        return userList;
     }
 
     @QueryMapping
@@ -56,9 +67,8 @@ public class GraphQLController {
         return outputTweets;
     }
     @MutationMapping
-    public User createUser(@Argument String id, @Argument String name, @Argument String email, @Argument String phone) {
+    public User createUser(@Argument String name, @Argument String email, @Argument String phone) {
         User newUser = new User();
-        newUser.setId(id);
         newUser.setName(name);
         newUser.setEmail(email);
         newUser.setPhone(phone);
@@ -66,7 +76,7 @@ public class GraphQLController {
     }
     @MutationMapping
     public Tweet postTweet(@Argument String title, @Argument String message, @Argument String authorId, @Argument int validityLengthInDays) {
-        User author = getUser(authorId).get();
+        User author = getUserById(authorId).get();
 
         // Create a new Tweet instance
         Tweet newTweet = new Tweet(
@@ -83,7 +93,7 @@ public class GraphQLController {
     @MutationMapping
     public Tweet addFeedback(@Argument String tweetId, @Argument String authorId, @Argument String message){
         Tweet tweet = getTweet(tweetId).get();
-        User author = getUser(authorId).get();
+        User author = getUserById(authorId).get();
 
         if (tweet == null || author == null || message.length() > 100){
             throw new IllegalArgumentException();
