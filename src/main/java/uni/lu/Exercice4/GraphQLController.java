@@ -1,6 +1,7 @@
 package uni.lu.Exercice4;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
+import uni.lu.Exercice4.Entity.Feedback;
 import uni.lu.Exercice4.Entity.Tweet;
 import uni.lu.Exercice4.Entity.User;
 import uni.lu.Exercice4.Repository.TweetRepository;
@@ -23,14 +25,35 @@ public class GraphQLController {
     @Autowired
     private TweetRepository tweetRepository;
 
+
+    //Methods to improve readability
+
+    //method to check if a text contains a keyword independent of the case
+    public boolean containsCaseInsensitive(String text, String keyword){
+        return text.toLowerCase().contains(keyword.toLowerCase());
+    }
+
     @QueryMapping
     public Optional<User> getUser(@Argument String id){
         return userRepository.findById(id);
     }
+
+    @QueryMapping
+    public Optional<Tweet> getTweet(@Argument String id){
+        return tweetRepository.findById(id);
+    }
     
     @QueryMapping
     public List<Tweet> searchTweets(@Argument String query){
-        return tweetRepository.findByTitleContainingIgnoreCase(query);
+        Iterable<Tweet> tweetsIterable = tweetRepository.findAll();
+        
+        ArrayList<Tweet> outputTweets = new ArrayList<>();
+        tweetsIterable.forEach(tweet -> {
+            if (containsCaseInsensitive(tweet.getMessage(), query) || containsCaseInsensitive(tweet.getTitle(), query)){
+                outputTweets.add(tweet);
+            }
+        });
+        return outputTweets;
     }
     @MutationMapping
     public User createUser(@Argument String id, @Argument String name, @Argument String email, @Argument String phone) {
@@ -43,15 +66,7 @@ public class GraphQLController {
     }
     @MutationMapping
     public Tweet postTweet(@Argument String title, @Argument String message, @Argument String authorId, @Argument int validityLengthInDays) {
-        // Fetch the author by ID
-        Optional<User> authorOptional = userRepository.findById(authorId);
-        
-        // Handle case where the user does not exist
-        if (authorOptional.isEmpty()) {
-            throw new IllegalArgumentException("Author with ID " + authorId + " does not exist.");
-        }
-        
-        User author = authorOptional.get();
+        User author = getUser(authorId).get();
 
         // Create a new Tweet instance
         Tweet newTweet = new Tweet(
@@ -64,5 +79,17 @@ public class GraphQLController {
 
         // Save the tweet in the repository
         return tweetRepository.save(newTweet);
+    }
+    @MutationMapping
+    public Tweet addFeedback(@Argument String tweetId, @Argument String authorId, @Argument String message){
+        Tweet tweet = getTweet(tweetId).get();
+        User author = getUser(authorId).get();
+
+        if (tweet == null || author == null || message.length() > 100){
+            throw new IllegalArgumentException();
+        }
+        Feedback feedback = new Feedback(author, message);
+        tweet.addFeedback(feedback);
+        return tweetRepository.save(tweet);
     }
 }

@@ -12,16 +12,22 @@ type Tweet {
     author: User!
     postingDate: String!
     validityLengthInDays: Int!
-    feedback: [String]!
+    feedback: [Feedback]!
+}
+
+type Feedback{
+    author: User!
+    message: String!
 }
 
 type Query {
-    searchTweets(query: String!): [Tweet!]!
+    searchTweets(query: String!): [Tweet]
     getUser(id: ID!): User
+    getTweet(id: ID!): Tweet
 }
 
 type Mutation {
-    createUser(name: String!, email: String!, phone: String!): User
+    createUser(id: String!, name: String!, email: String!, phone: String!): User
     postTweet(title: String!, message: String!, authorId: ID!, validityLengthInDays: Int!): Tweet
-    addFeedback(tweetId: ID!, feedback: String!): Tweet
+    addFeedback(tweetId: ID!, authorId: ID! , message: String!): Tweet
 }

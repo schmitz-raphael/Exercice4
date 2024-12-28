@@ -7,11 +7,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 @Configuration
 public class RedisConfiguration {
-
-    // Use LettuceConnectionFactory instead of JedisConnectionFactory
     @Bean
     public LettuceConnectionFactory lettuceConnectionFactory() {
-        return new LettuceConnectionFactory("localhost", 6379);  // Customize host/port if needed
+        return new LettuceConnectionFactory("localhost", 6379);
     }
 
     @Bean

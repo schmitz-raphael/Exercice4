@@ -17,16 +17,16 @@ public class Tweet implements Serializable{
     private String message;
     private User author;
     private LocalDateTime postingDate;
-    private int validityLength;
-    private List<String> feedback;
+    private int validityLengthInDays;
+    private List<Feedback> feedbacks;
     
-    public Tweet(String title, String message, User author, LocalDateTime postingDate, int validityLength) {
+    public Tweet(String title, String message, User author, LocalDateTime postingDate, int validityLengthInDays) {
         this.title = title;
         this.message = message;
         this.author = author;
         this.postingDate = postingDate;
-        this.validityLength = validityLength;
-        this.feedback = new ArrayList<>();
+        this.validityLengthInDays = validityLengthInDays;
+        this.feedbacks = new ArrayList<>();
     }
 
     public String getId() {
@@ -49,14 +49,15 @@ public class Tweet implements Serializable{
         return postingDate;
     }
 
-    public int getValidityLength() {
-        return validityLength;
+    public int getValidityLengthInDays() {
+        return validityLengthInDays;
     }
 
-    public List<String> getFeedback() {
-        return feedback;
+    public List<Feedback> getFeedback() {
+        return feedbacks;
     }
 
-
-    
+    public void addFeedback(Feedback feedback) {
+        feedbacks.add(feedback);
+    }   
 }
